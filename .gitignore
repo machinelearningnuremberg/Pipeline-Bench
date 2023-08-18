@@ -1,0 +1,33 @@
+.mypy_cache/
+__pycache__/
+*.py[cod]
+*.csv
+*.txt
+*.png
+*.DS_Store
+*.tar.gz
+*.parquet
+*.zip
+.idea
+.vscode
+dist/
+
+*.lock
+
+pipeline_bench/__pycache__/
+
+pipeline_bench/data/__pycache__/
+pipeline_bench/data/openml_config
+pipeline_bench/data/*/__pycache__/
+pipeline_bench/lib/core/__pycache__/
+
+pipeline_bench_examples/pipeline_bench/
+pipeline_bench_examples/pipeline_bench_data/
+pipeline_bench_examples/pipeline_bench_tables/
+
+pipeline_bench/auto-sklearn/
+wanb/
+
+
+# in case you want to remove all .pyc files that were already tracked
+# find . -name "*.pyc" -exec git rm -f "{}" \;
