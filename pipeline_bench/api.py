@@ -334,6 +334,10 @@ class Benchmark:
 
         return np.array([self._metafeatures[mf] for mf in metafeatures])
 
+    def get_hp_candidates_ids(self) -> list:
+
+        return self._metafeatures["hp_candidates_ids"]
+
     def collate_data(self) -> None:
 
         if not DATA_CREATION_AVAILABLE:
