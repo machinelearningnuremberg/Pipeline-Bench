@@ -137,8 +137,13 @@ class Benchmark:
         zip_file = self.table_dir / f"collated_data-{self.task_id}.zip"
         assert zip_file.exists() and zip_file.is_file()
 
-        with zipfile.ZipFile(zip_file, "r") as archive:
-            archive.extractall(self.table_dir)
+        # Check if all the table_names.parquet files exist
+        if all((self.table_dir / f"{table_name}.parquet").exists() for table_name in table_names):
+            print("All .parquet files already exist. Skipping extraction.")
+        else:
+            print("Extracting .parquet files from zip archive.")
+            with zipfile.ZipFile(zip_file, "r") as archive:
+                archive.extractall(self.table_dir)
 
         # Load divisions and DataFrames
         for table_name in table_names:
