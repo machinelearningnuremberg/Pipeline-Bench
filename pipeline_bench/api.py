@@ -138,10 +138,7 @@ class Benchmark:
         assert zip_file.exists() and zip_file.is_file()
 
         # Check if all the table_names.parquet files exist
-        if all((self.table_dir / f"{table_name}.parquet").exists() for table_name in table_names):
-            print("All .parquet files already exist. Skipping extraction.")
-        else:
-            print("Extracting .parquet files from zip archive.")
+        if not all((self.table_dir / f"{table_name}.parquet").exists() for table_name in table_names):
             with zipfile.ZipFile(zip_file, "r") as archive:
                 archive.extractall(self.table_dir)
 
