@@ -51,6 +51,7 @@ class Benchmark:
         mode: str | BenchmarkTypes = BenchmarkTypes.Live,
         # download: bool = False,
         worker_dir: str | Path | None = None,
+        backend: str = "pandas",
         lazy: bool = False,  # pylint: disable=unused-argument
     ):
         if isinstance(mode, str):
@@ -75,6 +76,7 @@ class Benchmark:
         self.table_dir = worker_dir / "pipeline_bench_tables" / str(task_id)
         self.table_dir.mkdir(parents=True, exist_ok=True)
 
+        self.backend = backend
         # if download:
         #     if mode is BenchmarkTypes.Live:
         #         self.task_dir.mkdir(parents=True, exist_ok=True)
@@ -144,11 +146,16 @@ class Benchmark:
 
         # Load divisions and DataFrames
         for table_name in table_names:
-            with open(self.table_dir / f"{table_name}_divisions.json") as f:
-                divisions = json.load(f)
-            divisions.sort()
-            dataframe = dd.read_parquet(self.table_dir / f"{table_name}.parquet")
-            dataframe.divisions = tuple(divisions)
+            if self.backend == "dask":
+                with open(self.table_dir / f"{table_name}_divisions.json") as f:
+                    divisions = json.load(f)
+                divisions.sort()
+                dataframe = dd.read_parquet(self.table_dir / f"{table_name}.parquet")
+                dataframe.divisions = tuple(divisions)
+            elif self.backend == "pandas":
+                dataframe = pd.read_parquet(self.table_dir / f"{table_name}.parquet")
+            else:
+                raise ValueError(f"Unknown backend: {self.backend}")
             setattr(self, f"_{table_name}", dataframe)
 
         # Load metafeatures from JSON
@@ -202,8 +209,9 @@ class Benchmark:
         # Filter the dataframe for the columns and rows corresponding to the pipeline_ids and datapoints
         df = self._labels.loc[datapoint_ids, columns]
 
-        # Compute only the selected rows
-        df = df.compute()
+        if self.backend == "dask":
+            # Compute only the selected rows
+            df = df.compute()
 
         # Check if the dataframe is empty, which would mean no match was found
         if df.empty:
@@ -304,8 +312,9 @@ class Benchmark:
         # Filter the dataframe to include only the pipelines in the provided list
         df = self._configs.loc[self._configs.index.isin(pipeline_ids)]
 
-        # Compute only the selected rows
-        df = df.compute()
+        if self.backend == "dask":
+            # Compute only the selected rows
+            df = df.compute()
 
         # Repeat rows in dataframe to match the count in the original pipeline_ids list
         df = df.loc[df.index.repeat([pipeline_ids.count(x) for x in df.index])]
