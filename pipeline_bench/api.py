@@ -272,7 +272,9 @@ class Benchmark:
         splits.remove("train") if not return_train and "train" in splits else None
 
         for split in splits:
-            split_data = self._dataset.loc[self._dataset["split"] == split].compute()
+            split_data = self._dataset.loc[self._dataset["split"] == split]
+            if self.backend == "dask":
+                split_data = split_data.compute()
 
             if split_data.empty:
                 raise ValueError(f"No data found for split '{split}'.")
