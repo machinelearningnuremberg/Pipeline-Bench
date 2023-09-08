@@ -119,12 +119,12 @@ def default_global_seed_gen(
 
 
 def collate_data(
-    worker_dir: str | Path, task_id: int, dest_dir: str | Path | None
+    worker_dir: str | Path, task_id: int, dest_dir: str | Path | None, , data_version: str = "micro"
 ) -> None:
 
     worker_dir = Path(worker_dir)  # ensure that worker_dir is a Path object
     dir_tree = DirectoryTree(worker_dir, task_id=task_id, config_id=-1, read_only=True)
-    metric_reader = MetricReader(dir_tree)
+    metric_reader = MetricReader(dir_tree, data_version=data_version)
     metric_reader.collate_all_data(dest_dir)
 
 
@@ -459,7 +459,7 @@ class MetricReader:
     """
 
     def __init__(
-        self, directory_tree: DirectoryTree, logger: logging.Logger | None = None
+        self, directory_tree: DirectoryTree, logger: logging.Logger | None = None, data_version: str = "micro"
     ):
         """
         Initialize the MetricReader with a directory structure and a logger.
@@ -484,6 +484,7 @@ class MetricReader:
 
         # self.max_workers = 50
 
+        self.data_version = data_version
         self.config_files, self.labels_files = self._prepare_file_lists()
 
     def _prepare_file_lists(self):
@@ -503,7 +504,13 @@ class MetricReader:
         config_files = [cf for cf in config_files if get_file_name(cf) in common_names]
         labels_files = [lf for lf in labels_files if get_file_name(lf) in common_names]
 
-        return config_files, labels_files
+        data_version_map = {
+            "micro": 200,
+            "mini": 1000,
+            "extended": 10000,
+        }
+
+        return config_files[:data_version_map[self.data_version]], labels_files[:data_version_map[self.data_version]]
 
     @staticmethod
     def _read_single_parquet_file(
@@ -511,8 +518,10 @@ class MetricReader:
         drop_keys: list[str] | None = None,
         set_config_id_as_index=False,
         rename_cols=False,
+        config_id: int | None = None,
     ):
-        config_id = int(re.match(r".*?(\d+)\.parquet", Path(file_path).name).group(1))
+        if config_id is None:
+            config_id = int(re.match(r".*?(\d+)\.parquet", Path(file_path).name).group(1))
         df = dd.read_parquet(file_path)
 
         if drop_keys is not None:
@@ -544,8 +553,10 @@ class MetricReader:
         )
 
         dataframes = []
+        config_id = 0
         for file in tqdm(files, total=len(files)):
-            df = func(file)
+            df = func(file, config_id=config_id)
+            config_id += 1
             dataframes.append(df)
 
         return dataframes
@@ -597,6 +608,23 @@ class MetricReader:
         df = df.categorize()
         df = dd.get_dummies(df, drop_first=True)
 
+        # Replace NaN values with 0
+        df = df.fillna(0)   
+
+        # Count the number of rows (configs) in df
+        num_pipelines = len(df.compute())
+
+        # Read the existing metafeatures.json
+        with open(self.directory_tree.metafeatures_file, 'r') as f:
+            metafeatures_data = json.load(f)    
+
+        # Update the num_pipelines value
+        metafeatures_data['num_pipelines'] = num_pipelines
+
+        # Write the updated metafeatures.json back to disk
+        with open(self.directory_tree.metafeatures_file, 'w') as f:
+            json.dump(metafeatures_data, f, indent=4)
+
         return df
 
     def collate_all_data(self, dest_dir: str | Path | None = None):
@@ -642,7 +670,7 @@ class MetricReader:
         archive_dir = Path(archive_dir)
         archive_dir.mkdir(exist_ok=True)
 
-        archive_file = archive_dir / f"collated_data-{self.directory_tree.task_id}"
+        archive_file = archive_dir / f"{self.data_version}-{self.directory_tree.task_id}"
         shutil.make_archive(
             str(archive_file), "zip", str(self.directory_tree.collated_dir)
         )
