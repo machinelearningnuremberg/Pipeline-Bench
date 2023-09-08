@@ -119,7 +119,7 @@ def default_global_seed_gen(
 
 
 def collate_data(
-    worker_dir: str | Path, task_id: int, dest_dir: str | Path | None, , data_version: str = "micro"
+    worker_dir: str | Path, task_id: int, dest_dir: str | Path | None, data_version: str = "micro"
 ) -> None:
 
     worker_dir = Path(worker_dir)  # ensure that worker_dir is a Path object
