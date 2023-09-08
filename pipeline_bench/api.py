@@ -52,6 +52,7 @@ class Benchmark:
         # download: bool = False,
         worker_dir: str | Path | None = None,
         backend: str = "pandas",
+        data_version: str = "micro",
         lazy: bool = False,  # pylint: disable=unused-argument
     ):
         if isinstance(mode, str):
@@ -64,6 +65,7 @@ class Benchmark:
 
         self.task_id = task_id
         self.mode = mode
+        self.data_version = data_version
         self.splits = ["train", "valid", "test"]
 
         # Directories
@@ -73,7 +75,7 @@ class Benchmark:
         self.base_dir.mkdir(exist_ok=True, parents=True)
         self.task_dir = worker_dir / "pipeline_bench_data" / str(task_id)
         self.task_dir.mkdir(parents=True, exist_ok=True)
-        self.table_dir = worker_dir / "pipeline_bench_tables" / str(task_id)
+        self.table_dir = worker_dir / "pipeline_bench_tables" / str(task_id) / self.data_version
         self.table_dir.mkdir(parents=True, exist_ok=True)
 
         self.backend = backend
@@ -136,7 +138,7 @@ class Benchmark:
     def _load_table(self, table_names=["dataset", "labels", "configs"]):
 
         assert self.table_dir.exists() and self.table_dir.is_dir()
-        zip_file = self.table_dir / f"collated_data-{self.task_id}.zip"
+        zip_file = self.table_dir / f"{self.data_version}-{self.task_id}.zip"
         assert zip_file.exists() and zip_file.is_file()
 
         # Check if all the table_names.parquet files exist
@@ -360,7 +362,8 @@ class Benchmark:
             )
 
         collate_data(
-            worker_dir=self.base_dir, task_id=self.task_id, dest_dir=self.table_dir
+            worker_dir=self.base_dir, task_id=self.task_id, dest_dir=self.table_dir,
+            data_version=self.data_version
         )
 
         self._load_table()
