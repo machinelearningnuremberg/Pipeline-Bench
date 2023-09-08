@@ -351,7 +351,7 @@ class Benchmark:
 
     def get_hp_candidates_ids(self) -> list:
 
-        return self._metafeatures["hp_candidates_ids"]
+        return list(range(0, self._metafeatures["num_pipelines"]))
 
     def collate_data(self) -> None:
 
