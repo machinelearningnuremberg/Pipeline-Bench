@@ -353,6 +353,13 @@ class Benchmark:
 
         return list(range(0, self._metafeatures["num_pipelines"]))
 
+    def get_worst_and_best_performance(self, split: str, metric_name: str):
+
+        worst_performance = self._metafeatures[f"worst_{metric_name}_{split}"]
+        best_performance = self._metafeatures[f"best_{metric_name}_{split}"]
+        
+        return worst_performance, best_performance
+
     def collate_data(self) -> None:
 
         if not DATA_CREATION_AVAILABLE:
