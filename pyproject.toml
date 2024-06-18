@@ -27,6 +27,7 @@ gpytorch = { version = ">=1.6.0", optional = true }
 
 [tool.poetry.extras]
 without_data_creation = ["numpy", "pandas", "dask", "pyarrow"]
+soe_compatibility = ["dask", "pyarrow", "auto-sklearn", "openml", "torchaudio"]
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^3.2.2"
