@@ -1,3 +1,0 @@
-[submodule "pipeline_bench/auto-sklearn"]
-	path = pipeline_bench/auto-sklearn
-	url = https://github.com/automl/auto-sklearn.git
