@@ -14,20 +14,20 @@ packages = [
 python = ">=3.9"
 numpy = "<2.0.0"
 pandas = ">=1.2.4"
-jupyter = ">=1.0.0"
 dask = ">=2023.6.0"
 pyarrow = ">=12.0.1"
+scikit-learn = ">0.24.2,<1.0.0"
+configspace = ">0.4.21"
 
-auto-sklearn = { path = "pipeline_bench/auto-sklearn", optional = true }
-openml = { version = ">=0.12.2", optional = true }
-torch = { version = ">=1.9.0", extras = ["cpuonly"], optional = true }
-torchvision = { version = ">=0.10.0", optional = true }
-torchaudio = { version = ">=0.9.0", optional = true }
-gpytorch = { version = ">=1.6.0", optional = true }
+openml = ">=0.12.2"
+torch = ">=1.9.0"
+torchvision = ">=0.10.0"
+torchaudio = ">=0.9.0"
+tqdm = "^4.66.4"
 
 [tool.poetry.extras]
 without_data_creation = ["numpy", "pandas", "dask", "pyarrow"]
-soe_compatibility = ["dask", "pyarrow", "auto-sklearn", "openml", "torchaudio"]
+soe_compatibility = ["dask", "pyarrow", "openml", "torchaudio"]
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^3.2.2"
@@ -40,14 +40,14 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 90
-target-version = ["py38"]
+target-version = ["py310"]
 
 [tool.isort]
 profile = "black"
 line_length = 90
 
 [tool.mypy]
-files = ["nanogpt_bench"]
+files = ["pipeline_bench"]
 namespace_packages = true
 follow_imports = "skip"
 ignore_missing_imports = true

@@ -1,5 +1,4 @@
-from autosklearn.pipeline.classification import SimpleClassificationPipeline
-
+from pipeline_bench.lib.auto_sklearn.classification_pipeline import SimpleClassificationPipeline
 
 import ConfigSpace
 
@@ -20,15 +19,10 @@ def config_sampler(
     else:
         for _ in range(config_id):
             random_state = next(global_seed_gen)
-
+    
     search_space = get_search_space()
     search_space.seed(random_state)
 
     config = search_space.sample_configuration()
-
-    for hp in search_space.get_hyperparameters():
-        if "text_transformer" in hp.name:
-            if hp.name in config and hasattr(hp, "default_value"):
-                config[hp.name] = hp.default_value
 
     return config, random_state

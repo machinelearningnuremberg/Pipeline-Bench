@@ -97,7 +97,7 @@ Consider running `~/.conda/bin/conda init` or `~/.conda/bin/conda init zsh`.
 Create the environment and activate it
 
 ```
-conda create -n Pipeline-Bench python=3.9
+conda create -n Pipeline-Bench python=3.10
 conda activate Pipeline-Bench
 ```
 

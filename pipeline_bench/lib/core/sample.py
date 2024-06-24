@@ -12,7 +12,7 @@ from pipeline_bench.data import Dataset
 
 from pipeline_bench.lib.core.procs import train
 
-from autosklearn.pipeline.classification import SimpleClassificationPipeline
+from pipeline_bench.lib.auto_sklearn.classification_pipeline import SimpleClassificationPipeline
 
 
 # pipeline_id = 3654
@@ -73,7 +73,7 @@ def run_task(
 
         util.set_seed(curr_global_seed)
         logger.info(f"Setting global seed to {curr_global_seed}.")
-
+        
         train(
             pipeline=pipeline,
             dataset=dataset,
@@ -85,9 +85,13 @@ def run_task(
     else:
         # Clean-up after nominal program execution
         logger.info("Sampled pipeline trained successfully.")
-
+        
+        breakpoint()
         del pipeline  # Release memory
 
     # Clean up memory before terminating task
     del metric_logger
     del dir_tree
+
+
+

@@ -5,7 +5,7 @@ import time
 import pipeline_bench.lib.utils as util
 
 
-from autosklearn.pipeline.classification import SimpleClassificationPipeline
+from pipeline_bench.lib.auto_sklearn.classification_pipeline import SimpleClassificationPipeline
 from sklearn.utils.validation import check_is_fitted
 
 import sklearn
@@ -24,6 +24,7 @@ def _main_proc(
 
     start_time = time.time()
     if split_name == "train":
+        breakpoint()
         pipeline = pipeline.fit(inputs, targets)
     y_proba = pipeline.predict_proba(inputs.copy())
     end_time = time.time()
