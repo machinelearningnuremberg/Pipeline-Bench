@@ -5,20 +5,20 @@ import pipeline_bench
 
 
 def run_pipelines(pipeline_id, task_id, worker_dir):
-    # try:
-    benchmark = pipeline_bench.Benchmark(
-        task_id=task_id,
-        worker_dir=worker_dir,
-        mode="live",
-    )
+    try:
+        benchmark = pipeline_bench.Benchmark(
+            task_id=task_id,
+            worker_dir=worker_dir,
+            mode="live",
+        )
 
-    _ = benchmark(
-        pipeline_id=pipeline_id,
-    )
-    # except Exception as e:
-    #     print(f"Failed for pipeline_id: {pipeline_id}")
-    #     print(e)
-    #     print()
+        _ = benchmark(
+            pipeline_id=pipeline_id,
+        )
+    except Exception as e:
+        print(f"Failed for pipeline_id: {pipeline_id}")
+        print(e)
+        print()
 
 
 def process_pipeline(pipeline_id, task_id, worker_dir):

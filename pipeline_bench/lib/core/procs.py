@@ -5,7 +5,6 @@ import time
 import pipeline_bench.lib.utils as util
 
 
-from pipeline_bench.lib.auto_sklearn.classification_pipeline import SimpleClassificationPipeline
 from sklearn.utils.validation import check_is_fitted
 
 import sklearn
@@ -14,7 +13,7 @@ from pipeline_bench.data import Dataset
 
 
 def _main_proc(
-    pipeline: SimpleClassificationPipeline,
+    pipeline: sklearn.pipeline.Pipeline,
     dataset: Dataset,
     metric_logger: util.MetricLogger,
     split_name: str = "train",
@@ -24,13 +23,7 @@ def _main_proc(
 
     start_time = time.time()
     if split_name == "train":
-        breakpoint()
         pipeline = pipeline.fit(inputs, targets)
-    y_proba = pipeline.predict_proba(inputs.copy())
-    end_time = time.time()
-
-    duration = (end_time - start_time) / len(inputs)
-    metric_logger.log_labels(y_proba=y_proba, duration=duration)
 
     diverged = False
     try:
@@ -44,12 +37,18 @@ def _main_proc(
 
     if diverged:
         return True
+    
+    y_proba = pipeline.predict_proba(inputs.copy())
+    end_time = time.time()
+
+    duration = (end_time - start_time) / len(inputs)
+    metric_logger.log_labels(y_proba=y_proba, duration=duration)
 
     return False
 
 
 def train(
-    pipeline: SimpleClassificationPipeline,
+    pipeline: sklearn.pipeline.Pipeline,
     dataset: Dataset,
     metric_logger: util.MetricLogger,
 ):

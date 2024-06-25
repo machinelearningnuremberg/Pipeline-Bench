@@ -12,7 +12,6 @@ from pipeline_bench.data import Dataset
 
 from pipeline_bench.lib.core.procs import train
 
-from pipeline_bench.lib.auto_sklearn.classification_pipeline import SimpleClassificationPipeline
 
 
 # pipeline_id = 3654
@@ -47,7 +46,7 @@ def run_task(
 
     logger.setLevel(logging.DEBUG if debug else logging.INFO)
 
-    config, curr_global_seed = pipeline_bench.lib.core.search_space.config_sampler(
+    config, pipeline, curr_global_seed = pipeline_bench.lib.core.search_space.config_sampler(
         global_seed_gen=global_seed_gen, config_id=pipeline_id
     )
     logger.info("Sampled new pipeline.")
@@ -60,11 +59,7 @@ def run_task(
     metric_logger.log_dataset(dataset)
     metric_logger.close_parquet_writer()
 
-    # Pipeline initialization
-    pipeline = SimpleClassificationPipeline()
-    pipeline.set_hyperparameters(config)
     logger.debug(f"Logged new sample for task {task_id}, pipeline {pipeline_id}.")
-
     # Actual model training and evaluation
     try:
 
@@ -86,7 +81,7 @@ def run_task(
         # Clean-up after nominal program execution
         logger.info("Sampled pipeline trained successfully.")
         
-        breakpoint()
+        metric_logger.log_pipeline(pipeline)
         del pipeline  # Release memory
 
     # Clean up memory before terminating task

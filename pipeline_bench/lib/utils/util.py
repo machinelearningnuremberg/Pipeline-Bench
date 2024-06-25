@@ -29,6 +29,8 @@ from tqdm import tqdm
 from scipy.stats import skew, kurtosis
 from dataclasses import dataclass, field
 
+import joblib
+from sklearn.pipeline import Pipeline
 
 def set_seed(seed):
     """
@@ -178,6 +180,7 @@ class DirectoryTree:
                 self.task_dir,
                 self.labels_dir,
                 self.configs_dir,
+                self.pipelines_dir,
             ]
             for subdir in subdirs:
                 if not subdir.exists():
@@ -198,7 +201,7 @@ class DirectoryTree:
             self._config_id = new_index
             if self.read_only:
                 return
-            subdirs = [self.configs_dir, self.labels_dir, self.errors_dir]
+            subdirs = [self.configs_dir, self.labels_dir, self.pipelines_dir, self.errors_dir]
             for subdir in subdirs:
                 if not subdir.exists():
                     subdir.mkdir(parents=True)
@@ -246,6 +249,14 @@ class DirectoryTree:
             self.config_id is not None
         ), "A valid config_id needs to be set before the relevant file can be accessed."
         return self.configs_dir / f"{str(self.config_id)}.parquet"
+
+    @property
+    def pipelines_dir(self) -> Path:
+        return self.task_dir / "pipelines"
+    
+    @property
+    def pipeline_file(self) -> Path:
+        return self.pipelines_dir / f"{str(self.config_id)}.joblib"
 
     @property
     def error_file(self) -> Path:
@@ -414,6 +425,16 @@ class MetricLogger:
         df["duration"] = duration
 
         self._write_dataframe_to_parquet(df, self.directory_tree.labels_file)
+
+    def log_pipeline(self, pipeline: Pipeline):
+        """
+        Logs the pipeline object.
+
+        Parameters:
+            pipeline (Pipeline): The pipeline object to be logged.
+        """
+
+        joblib.dump(pipeline, self.directory_tree.pipeline_file)
 
     def log_error(
         self, config: Any, curr_global_seed: Any, e: Exception, debug: bool = False
