@@ -42,6 +42,7 @@ class Benchmark:
     _dataset = pd.DataFrame()
     _configs = pd.DataFrame()
     _labels = pd.DataFrame()
+    _pipelines = pd.DataFrame()
     _metafeatures = AttrDict()
     _surrogates = None
 
@@ -135,7 +136,7 @@ class Benchmark:
     def _load_surrogate(self):
         pass
 
-    def _load_table(self, table_names=["dataset", "labels", "configs"]):
+    def _load_table(self, table_names=["dataset", "labels", "configs", "pipelines"]):
 
         assert self.table_dir.exists() and self.table_dir.is_dir()
         zip_file = self.table_dir / f"{self.data_version}-{self.task_id}.zip"
